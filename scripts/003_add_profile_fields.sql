@@ -1,0 +1,9 @@
+-- Add additional profile fields for enhanced user profiles
+ALTER TABLE profiles
+ADD COLUMN IF NOT EXISTS avatar_url TEXT,
+ADD COLUMN IF NOT EXISTS bio TEXT,
+ADD COLUMN IF NOT EXISTS location TEXT,
+ADD COLUMN IF NOT EXISTS website TEXT,
+ADD COLUMN IF NOT EXISTS twitter TEXT,
+ADD COLUMN IF NOT EXISTS linkedin TEXT,
+ADD COLUMN IF NOT EXISTS github TEXT;
