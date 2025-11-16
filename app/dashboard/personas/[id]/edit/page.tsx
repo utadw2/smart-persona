@@ -1,10 +1,11 @@
-import { redirect } from "next/navigation"
+import { redirect } from 'next/navigation'
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { PersonaForm } from "@/components/personas/persona-form"
 import { PersonaVisibilitySettings } from "@/components/personas/persona-visibility-settings"
 
-export default async function EditPersonaPage({ params }: { params: { id: string } }) {
+export default async function EditPersonaPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
 
   const {
@@ -20,7 +21,7 @@ export default async function EditPersonaPage({ params }: { params: { id: string
   const { data: persona } = await supabase
     .from("personas")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle()
 
