@@ -27,11 +27,10 @@ export default async function HomePage() {
       <section className="flex flex-1 flex-col items-center justify-center px-6 py-20 text-center">
         <div className="mx-auto max-w-3xl">
           <h1 className="mb-6 text-balance text-5xl font-bold tracking-tight md:text-6xl">
-            AI Career & Community Platform
+            Smart Persona
           </h1>
           <p className="mb-8 text-pretty text-lg text-muted-foreground md:text-xl">
-            Build intelligent AI personas for job applications, connect with professionals, discover opportunities, and
-            engage in meaningful community discussions.
+            Project them1 class2
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Button asChild size="lg">
@@ -53,9 +52,9 @@ export default async function HomePage() {
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                 <Bot className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="mb-2 font-semibold">AI Personas</h3>
+              <h3 className="mb-2 font-semibold"> Personas</h3>
               <p className="text-sm text-muted-foreground">
-                Create intelligent personas tailored to your career goals and industry
+               Create Persona
               </p>
             </div>
             <div className="flex flex-col items-center text-center">
