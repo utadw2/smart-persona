@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { SearchInput } from "@/components/ui/search-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Eye, Briefcase, GraduationCap } from "lucide-react"
+import { Eye, Briefcase, GraduationCap } from 'lucide-react'
 import Link from "next/link"
 
 interface CommunityPersonasProps {
@@ -38,10 +38,10 @@ export function CommunityPersonas({ personas }: CommunityPersonasProps) {
       switch (sortBy) {
         case "views":
           return (b.views_count || 0) - (a.views_count || 0)
-        case "name":
-          return a.name.localeCompare(b.name)
         case "recent":
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        case "name":
+          return a.name.localeCompare(b.name)
         default:
           return 0
       }
@@ -147,14 +147,9 @@ export function CommunityPersonas({ personas }: CommunityPersonasProps) {
                     <Eye className="h-4 w-4" />
                     <span>{persona.views_count || 0} views</span>
                   </div>
-                  <div className="flex gap-2">
-                    <Button asChild variant="ghost" size="sm">
-                      <Link href={`/community/users/${persona.user_id}`}>Profile</Link>
-                    </Button>
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/community/personas/${persona.id}`}>View</Link>
-                    </Button>
-                  </div>
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/community/personas/${persona.id}`}>View Profile</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

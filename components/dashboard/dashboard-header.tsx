@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-import { useRouter } from "next/navigation"
-import { LogOut, Settings, UserIcon, Shield, Bookmark } from "lucide-react"
+import { useRouter, usePathname } from 'next/navigation'
+import { LogOut, Settings, UserIcon, Shield, Bookmark } from 'lucide-react'
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 interface DashboardHeaderProps {
   user: User
@@ -22,6 +23,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
 
   const handleSignOut = async () => {
@@ -31,6 +33,13 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
 
   const isAdmin = profile?.role === "admin"
 
+  const isActive = (path: string) => {
+    if (path === "/dashboard") {
+      return pathname === "/dashboard"
+    }
+    return pathname.startsWith(path)
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center justify-between px-6">
@@ -39,32 +48,71 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
             Smart Persona
           </Link>
           <nav className="hidden items-center gap-4 md:flex">
-            <Link href="/dashboard" className="text-sm font-medium">
+            <Link
+              href="/dashboard"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isActive("/dashboard") && pathname === "/dashboard"
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground"
+              )}
+            >
               Dashboard
             </Link>
             <Link
               href="/dashboard/personas"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isActive("/dashboard/personas")
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground"
+              )}
             >
               Personas
             </Link>
-            <Link href="/dashboard/jobs" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            <Link
+              href="/dashboard/jobs"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isActive("/dashboard/jobs")
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground"
+              )}
+            >
               Find Jobs
             </Link>
-            <Link href="/community" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            <Link
+              href="/community"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isActive("/community")
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground"
+              )}
+            >
               Community
             </Link>
-            <Link href="/dashboard/chat" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+            <Link
+              href="/dashboard/chat"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isActive("/dashboard/chat")
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground"
+              )}
+            >
               Chat
             </Link>
-            <Link href="/dashboard/resume" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-              Resume
-            </Link>
             <Link
-              href="/dashboard/analytics"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
+              href="/dashboard/resume"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-foreground",
+                isActive("/dashboard/resume")
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground"
+              )}
             >
-              Analytics
+              Resume
             </Link>
           </nav>
         </div>
@@ -101,7 +149,7 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/profile">
                   <UserIcon className="mr-2 h-4 w-4" />
-                  Profile
+                  View Profile
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

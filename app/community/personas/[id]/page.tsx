@@ -1,10 +1,10 @@
-import { redirect, notFound } from "next/navigation"
+import { redirect, notFound } from 'next/navigation'
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Briefcase, GraduationCap, Code, ExternalLink, MapPin, DollarSign } from "lucide-react"
+import { Briefcase, GraduationCap, Code, ExternalLink, MapPin, DollarSign } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { FollowButton } from "@/components/community/follow-button"
 import { SkillEndorsements } from "@/components/endorsements/skill-endorsements"
@@ -12,7 +12,7 @@ import { ExportPersonaButton } from "@/components/personas/export-persona-button
 import Link from "next/link"
 import type { SkillWithEndorsements } from "@/lib/types"
 
-export default async function PersonaDetailPage({ params }: { params: { id: string } }) {
+export default async function PersonaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
 
   const {
@@ -25,7 +25,8 @@ export default async function PersonaDetailPage({ params }: { params: { id: stri
 
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", user.id).single()
 
-  const { data: persona } = await supabase.from("personas").select("*").eq("id", params.id).maybeSingle()
+  const { id } = await params
+  const { data: persona } = await supabase.from("personas").select("*").eq("id", id).maybeSingle()
 
   if (!persona) {
     notFound()
@@ -54,7 +55,7 @@ export default async function PersonaDetailPage({ params }: { params: { id: stri
     await supabase
       .from("personas")
       .update({ views_count: (persona.views_count || 0) + 1 })
-      .eq("id", params.id)
+      .eq("id", id)
   }
 
   const { data: followData } = await supabase
@@ -74,14 +75,14 @@ export default async function PersonaDetailPage({ params }: { params: { id: stri
   const skillsWithEndorsements: SkillWithEndorsements[] = await Promise.all(
     skills.map(async (skill: string) => {
       const { data: count } = await supabase.rpc("get_skill_endorsement_count", {
-        p_persona_id: params.id,
+        p_persona_id: id,
         p_skill: skill,
       })
 
       const { data: userEndorsement } = await supabase
         .from("skill_endorsements")
         .select("id")
-        .eq("persona_id", params.id)
+        .eq("persona_id", id)
         .eq("skill", skill)
         .eq("endorser_id", user.id)
         .maybeSingle()
@@ -209,7 +210,7 @@ export default async function PersonaDetailPage({ params }: { params: { id: stri
                 </div>
                 {skillsWithEndorsements.length > 0 && (
                   <SkillEndorsements
-                    personaId={params.id}
+                    personaId={id}
                     skills={skillsWithEndorsements}
                     canEndorse={persona.user_id !== user.id}
                   />
@@ -284,7 +285,7 @@ export default async function PersonaDetailPage({ params }: { params: { id: stri
                     Job Preferences
                   </CardTitle>
                   <Button asChild variant="outline" size="sm">
-                    <Link href={`/dashboard/jobs?persona=${params.id}`}>View Matching Jobs</Link>
+                    <Link href={`/dashboard/jobs?persona=${id}`}>View Matching Jobs</Link>
                   </Button>
                 </div>
               </CardHeader>

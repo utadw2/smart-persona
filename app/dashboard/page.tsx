@@ -40,11 +40,7 @@ export default async function DashboardPage() {
       <DashboardHeader user={user} profile={profile} />
       <main className="flex-1 p-6">
         <div className="mx-auto max-w-7xl space-y-6">
-          <StatsCards
-            personasCount={personas?.length || 0}
-            chatMessagesCount={chatMessages?.length || 0}
-            postsCount={posts?.length || 0}
-          />
+          
           <div className="grid gap-6 lg:grid-cols-2">
             <ActivePersonas personas={personas || []} />
             <RecentMessages messages={chatMessages || []} />

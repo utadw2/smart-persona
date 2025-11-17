@@ -1,12 +1,14 @@
-import { redirect, notFound } from "next/navigation"
+import { redirect, notFound } from 'next/navigation'
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { PostDetail } from "@/components/community/post-detail"
 
-export default async function PostDetailPage({ params }: { params: { id: string } }) {
+export default async function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  
   // UUID format: 8-4-4-4-12 hexadecimal characters
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  if (!uuidRegex.test(params.id)) {
+  if (!uuidRegex.test(id)) {
     notFound()
   }
 
@@ -25,7 +27,7 @@ export default async function PostDetailPage({ params }: { params: { id: string 
   const { data: postData, error: postError } = await supabase
     .from("community_posts")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .maybeSingle()
 
   if (postError) {
@@ -60,13 +62,13 @@ export default async function PostDetailPage({ params }: { params: { id: string 
     await supabase
       .from("community_posts")
       .update({ views_count: (post.views_count || 0) + 1 })
-      .eq("id", params.id)
+      .eq("id", id)
   }
 
   const { data: commentsData } = await supabase
     .from("post_comments")
     .select("*")
-    .eq("post_id", params.id)
+    .eq("post_id", id)
     .order("created_at", { ascending: true })
 
   const comments = await Promise.all(
@@ -87,7 +89,7 @@ export default async function PostDetailPage({ params }: { params: { id: string 
   const { data: likeData } = await supabase
     .from("post_likes")
     .select("id")
-    .eq("post_id", params.id)
+    .eq("post_id", id)
     .eq("user_id", user.id)
     .maybeSingle()
 

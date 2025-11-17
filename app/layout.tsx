@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Smart Persona - AI Career & Community Platform",
   description: "Build AI personas, connect with professionals, find jobs, and engage in community discussions",
-    generator: 'v0.app'
+    generator: 'next.js',
 }
 
 export default function RootLayout({

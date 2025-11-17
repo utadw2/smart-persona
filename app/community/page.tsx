@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation"
+import { redirect } from 'next/navigation'
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { CommunityPersonas } from "@/components/community/community-personas"
 import { CommunityPosts } from "@/components/community/community-posts"
+import { CommunityChatSidebar } from "@/components/community/community-chat-sidebar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function CommunityPage() {
@@ -92,6 +93,8 @@ export default async function CommunityPage() {
           </Tabs>
         </div>
       </main>
+      
+      <CommunityChatSidebar currentUserId={user.id} />
     </div>
   )
 }
