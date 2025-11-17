@@ -31,7 +31,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ id:
     .maybeSingle()
 
   if (postError) {
-    console.error("[v0] Error fetching post:", postError)
+    console.error(" Error fetching post:", postError)
     notFound()
   }
 

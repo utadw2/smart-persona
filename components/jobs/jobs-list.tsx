@@ -24,11 +24,13 @@ export function JobsList({ jobs, personas, jobMatches, userId }: JobsListProps) 
   const [searchQuery, setSearchQuery] = useState("")
   const [savingJobId, setSavingJobId] = useState<string | null>(null)
 
+  // 27-65 feature cal Match job 
+
   const calculateMatchScore = (job: Job, persona: Persona): number => {
     let score = 0
     const maxScore = 100
 
-    // Match skills
+    // Match skills คำนวนการเข้ากันของสกิล หรือ jobMatches
     if (persona.career?.specializations && job.skills) {
       const matchingSkills = persona.career.specializations.filter((skill) =>
         job.skills.some((jobSkill) => jobSkill.toLowerCase().includes(skill.toLowerCase())),

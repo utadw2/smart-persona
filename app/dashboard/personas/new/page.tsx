@@ -23,7 +23,7 @@ export default async function NewPersonaPage() {
         <div className="mx-auto max-w-2xl space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Create Persona</h1>
-            <p className="text-muted-foreground">Define a new AI personality</p>
+            <p className="text-muted-foreground">Define a new  personality</p>
           </div>
           <PersonaForm userId={user.id} />
         </div>

@@ -36,7 +36,7 @@ export default async function PersonasPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Personas</h1>
-              <p className="text-muted-foreground">Manage your AI personalities</p>
+              <p className="text-muted-foreground">Manage your  personalities</p>
             </div>
             <Button asChild>
               <Link href="/dashboard/personas/new">

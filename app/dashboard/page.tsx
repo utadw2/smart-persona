@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
-import { StatsCards } from "@/components/dashboard/stats-cards"
-import { RecentMessages } from "@/components/dashboard/recent-messages"
 import { ActivePersonas } from "@/components/dashboard/active-personas"
 
 export default async function DashboardPage() {
@@ -43,7 +41,6 @@ export default async function DashboardPage() {
           
           <div className="grid gap-6 lg:grid-cols-2">
             <ActivePersonas personas={personas || []} />
-            <RecentMessages messages={chatMessages || []} />
           </div>
         </div>
       </main>

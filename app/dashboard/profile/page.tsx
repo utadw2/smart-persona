@@ -39,11 +39,6 @@ export default async function ProfilePage() {
       <main className="flex-1 p-6">
         <div className="mx-auto max-w-5xl space-y-6">
           <ProfileView profile={profile} userId={user.id} />
-          <ProfileStats
-            personasCount={personas?.length || 0}
-            chatMessagesCount={chatMessages?.length || 0}
-            postsCount={posts?.length || 0}
-          />
           <ProfileActivity messages={chatMessages || []} personas={personas || []} />
         </div>
       </main>

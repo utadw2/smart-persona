@@ -6,7 +6,7 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Smart Persona - AI Career & Community Platform",
+  title: "Smart Persona - m",
   description: "Build AI personas, connect with professionals, find jobs, and engage in community discussions",
     generator: 'next.js',
 }

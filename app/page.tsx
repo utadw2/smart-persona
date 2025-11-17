@@ -75,13 +75,6 @@ export default async function HomePage() {
                 Connect, share, and engage with professionals in your field
               </p>
             </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <BarChart className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="mb-2 font-semibold">Analytics</h3>
-              <p className="text-sm text-muted-foreground">Track your profile views, engagement, and career progress</p>
-            </div>
           </div>
         </div>
       </section>

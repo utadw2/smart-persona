@@ -103,17 +103,6 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
             >
               Chat
             </Link>
-            <Link
-              href="/dashboard/resume"
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-foreground",
-                isActive("/dashboard/resume")
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
-              Resume
-            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

@@ -76,7 +76,7 @@ export default async function CommunityPage() {
         <div className="mx-auto max-w-7xl space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Community</h1>
-            <p className="text-muted-foreground">Discover personas and connect with professionals</p>
+            <p className="text-muted-foreground">Description</p>
           </div>
 
           <Tabs defaultValue="personas" className="w-full">
