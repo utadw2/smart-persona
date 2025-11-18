@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { Plus, X } from "lucide-react"
+import { Plus, X } from 'lucide-react'
 
 interface PersonaFormProps {
   userId: string
@@ -33,6 +33,7 @@ export function PersonaForm({ userId, persona }: PersonaFormProps) {
     tone: persona?.tone || "professional",
     response_style: persona?.response_style || "concise",
     visibility: persona?.visibility || "private",
+    social_links: persona?.social_links || [],
     career: {
       title: persona?.career?.title || "",
       experience_years: persona?.career?.experience_years || 0,
@@ -60,6 +61,7 @@ export function PersonaForm({ userId, persona }: PersonaFormProps) {
   const [newSpecialization, setNewSpecialization] = useState("")
   const [newLocation, setNewLocation] = useState("")
   const [newProject, setNewProject] = useState({ title: "", description: "", technologies: "", link: "" })
+  const [newSocialLink, setNewSocialLink] = useState({ platform: "linkedin", url: "" })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -249,6 +251,23 @@ export function PersonaForm({ userId, persona }: PersonaFormProps) {
     }
   }
 
+  const addSocialLink = () => {
+    if (newSocialLink.url.trim()) {
+      setFormData({
+        ...formData,
+        social_links: [...formData.social_links, { ...newSocialLink }],
+      })
+      setNewSocialLink({ platform: "linkedin", url: "" })
+    }
+  }
+
+  const removeSocialLink = (index: number) => {
+    setFormData({
+      ...formData,
+      social_links: formData.social_links.filter((_, i) => i !== index),
+    })
+  }
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -265,7 +284,8 @@ export function PersonaForm({ userId, persona }: PersonaFormProps) {
                   onClick={handleAIGenerate}
                   disabled={isGenerating || !formData.career.title}
                 >
-                  {isGenerating ? "Generating..." : "🤖 AI Generate"}
+                  <span className="mr-2"></span>
+                  {isGenerating ? "Generating" : "AI Generate"}
                 </Button>
                 {persona && (
                   <Button
@@ -275,7 +295,7 @@ export function PersonaForm({ userId, persona }: PersonaFormProps) {
                     onClick={handleFineTune}
                     disabled={isGenerating || !formData.description}
                   >
-                    {isGenerating ? "Fine-tuning..." : "✨ Fine Tune"}
+                    {isGenerating ? "Fine-tuning" : " Fine Tune"}
                   </Button>
                 )}
               </div>
@@ -302,42 +322,90 @@ export function PersonaForm({ userId, persona }: PersonaFormProps) {
                 required
               />
             </div>
+          </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="tone">Tone</Label>
-                <Select value={formData.tone} onValueChange={(value) => setFormData({ ...formData, tone: value })}>
-                  <SelectTrigger id="tone">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="professional">Professional</SelectItem>
-                    <SelectItem value="friendly">Friendly</SelectItem>
-                    <SelectItem value="casual">Casual</SelectItem>
-                    <SelectItem value="formal">Formal</SelectItem>
-                    <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* Social Media & Links */}
+          <div className="space-y-4 border-t pt-6">
+            <h3 className="text-lg font-semibold">Social Media & Links</h3>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Add Social Link</CardTitle>
+                <CardDescription>Add your social media profiles and websites</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="social_platform">Platform</Label>
+                    <Select
+                      value={newSocialLink.platform}
+                      onValueChange={(value) => setNewSocialLink({ ...newSocialLink, platform: value })}
+                    >
+                      <SelectTrigger id="social_platform">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="linkedin">LinkedIn</SelectItem>
+                        <SelectItem value="github">GitHub</SelectItem>
+                        <SelectItem value="twitter">Twitter/X</SelectItem>
+                        <SelectItem value="facebook">Facebook</SelectItem>
+                        <SelectItem value="instagram">Instagram</SelectItem>
+                        <SelectItem value="website">Website</SelectItem>
+                        <SelectItem value="portfolio">Portfolio</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="youtube">YouTube</SelectItem>
+                        <SelectItem value="dribbble">Dribbble</SelectItem>
+                        <SelectItem value="behance">Behance</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="social_url">URL</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="social_url"
+                        type="url"
+                        placeholder="https://..."
+                        value={newSocialLink.url}
+                        onChange={(e) => setNewSocialLink({ ...newSocialLink, url: e.target.value })}
+                        onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addSocialLink())}
+                      />
+                      <Button type="button" onClick={addSocialLink} size="icon">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
+            {formData.social_links.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="response_style">Response Style</Label>
-                <Select
-                  value={formData.response_style}
-                  onValueChange={(value) => setFormData({ ...formData, response_style: value })}
-                >
-                  <SelectTrigger id="response_style">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="concise">Concise</SelectItem>
-                    <SelectItem value="detailed">Detailed</SelectItem>
-                    <SelectItem value="conversational">Conversational</SelectItem>
-                    <SelectItem value="technical">Technical</SelectItem>
-                  </SelectContent>
-                </Select>
+                {formData.social_links.map((link, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="capitalize">
+                        {link.platform}
+                      </Badge>
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline truncate max-w-md"
+                      >
+                        {link.url}
+                      </a>
+                    </div>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeSocialLink(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </div>
 
           <div className="space-y-4 border-t pt-6">

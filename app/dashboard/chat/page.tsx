@@ -1,9 +1,13 @@
-import { redirect } from "next/navigation"
+import { redirect } from 'next/navigation'
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { ChatInterface } from "@/components/chat/chat-interface"
 
-export default async function ChatPage() {
+export default async function ChatPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ conversation?: string }>
+}) {
   const supabase = await createClient()
 
   const {
@@ -43,11 +47,18 @@ export default async function ChatPage() {
     }),
   )
 
+  const params = await searchParams
+  const initialConversationId = params.conversation || null
+
   return (
     <div className="flex min-h-screen flex-col">
       <DashboardHeader user={user} profile={profile} />
       <main className="flex-1">
-        <ChatInterface currentUserId={user.id} initialConversations={conversationsWithProfiles} />
+        <ChatInterface 
+          currentUserId={user.id} 
+          initialConversations={conversationsWithProfiles}
+          initialConversationId={initialConversationId}
+        />
       </main>
     </div>
   )

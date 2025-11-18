@@ -7,18 +7,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Send, Search, MessageSquare, Menu } from "lucide-react"
+import { Send, Search, MessageSquare, Menu } from 'lucide-react'
 import { formatDistanceToNow } from "date-fns"
 import { createClient } from "@/lib/supabase/client"
 
 interface ChatInterfaceProps {
   currentUserId: string
   initialConversations: any[]
+  initialConversationId?: string | null // Added prop for initial conversation selection
 }
 
-export function ChatInterface({ currentUserId, initialConversations }: ChatInterfaceProps) {
+export function ChatInterface({ currentUserId, initialConversations, initialConversationId }: ChatInterfaceProps) {
   const [conversations, setConversations] = useState(initialConversations)
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(initialConversationId || null)
   const [messages, setMessages] = useState<any[]>([])
   const [message, setMessage] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
@@ -58,6 +59,12 @@ export function ChatInterface({ currentUserId, initialConversations }: ChatInter
       supabase.removeChannel(channel)
     }
   }, [selectedConversation, currentUserId, otherParticipant?.id])
+
+  useEffect(() => {
+    if (initialConversationId && conversations.some(c => c.id === initialConversationId)) {
+      setSelectedConversation(initialConversationId)
+    }
+  }, [initialConversationId, conversations])
 
   const loadMessages = async () => {
     if (!selectedConversation || !otherParticipant) return
@@ -228,7 +235,7 @@ export function ChatInterface({ currentUserId, initialConversations }: ChatInter
                       <AvatarFallback>{participant?.full_name?.[0] || "U"}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 text-left">
-                      <p className="font-semibold text-sm">{participant?.full_name}</p>
+                      <p className="font-semibold text-sm md:text-base">{participant?.full_name}</p>
                       <p className="text-xs text-muted-foreground truncate">
                         {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true })}
                       </p>

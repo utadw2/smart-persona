@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Heart, MessageCircle, Eye, Plus, Send } from "lucide-react"
+import { Heart, MessageCircle, Eye, Plus, Send } from 'lucide-react'
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter } from 'next/navigation'
 import type { CommunityPost } from "@/lib/types"
 
 interface CommunityPostsProps {
@@ -141,8 +141,12 @@ export function CommunityPosts({ posts, currentUserId }: CommunityPostsProps) {
                       {post.comments_count}
                     </Link>
                   </Button>
-                  {post.user_id !== currentUserId && post.profiles?.id && (
-                    <Button variant="outline" size="sm" onClick={() => handleSendMessage(post.profiles.id)}>
+                  {post.user_id !== currentUserId && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleSendMessage(post.user_id)}
+                    >
                       <Send className="mr-1 h-4 w-4" />
                       Message
                     </Button>
