@@ -161,7 +161,7 @@ export function UserPreferencesComponent({ preferences, userId }: UserPreference
           {success && <p className="text-sm text-green-600">Preferences saved successfully!</p>}
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Preferences"}
+            {isLoading ? "Saving" : "Save Preferences"}
           </Button>
         </form>
       </CardContent>

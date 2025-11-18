@@ -71,7 +71,7 @@ export function ProfileSettings({ profile, userId }: ProfileSettingsProps) {
           {success && <p className="text-sm text-green-600">Profile updated successfully!</p>}
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? "Saving" : "Save Changes"}
           </Button>
         </form>
       </CardContent>

@@ -33,17 +33,18 @@ export default async function DashboardPage() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
 
-  return (
-    <div className="flex min-h-screen flex-col">
-      <DashboardHeader user={user} profile={profile} />
-      <main className="flex-1 p-6">
-        <div className="mx-auto max-w-7xl space-y-6">
-          
-          <div className="grid gap-6 lg:grid-cols-2">
-            <ActivePersonas personas={personas || []} />
+    return (
+      <div className="flex min-h-screen flex-col">
+        <DashboardHeader user={user} profile={profile} />
+        <main className="flex flex-1 items-center justify-center p-6">
+          <div className="w-full max-w-4xl mx-auto">
+            <div className="flex justify-center">
+              <div className="w-full max-w-2xl">
+                <ActivePersonas personas={personas || []} />
+              </div>
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
-  )
-}
+        </main>
+      </div>
+    )
+  }

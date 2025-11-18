@@ -32,8 +32,8 @@ export default async function SettingsPage() {
             <p className="text-muted-foreground">Manage your account and preferences</p>
           </div>
           <ProfileSettings profile={profile} userId={user.id} />
-          <UserPreferencesComponent preferences={userPreferences} userId={user.id} />
-          <UserAISettings settings={aiSettings} userId={user.id} />
+          {/* <UserPreferencesComponent preferences={userPreferences} userId={user.id} />
+          <UserAISettings settings={aiSettings} userId={user.id} /> */}
         </div>
       </main>
     </div>
