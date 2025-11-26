@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { JobsList } from "@/components/jobs/jobs-list"
+import { AdSpace } from "@/components/ads/ad-space"
 
 export default async function JobsPage() {
   const supabase = await createClient()
@@ -35,6 +36,8 @@ export default async function JobsPage() {
             <h1 className="text-3xl font-bold">Find Jobs</h1>
             <p className="text-muted-foreground">Discover opportunities matching your personas</p>
           </div>
+
+          <AdSpace placement="banner" />
 
           <JobsList jobs={jobs || []} personas={personas || []} jobMatches={jobMatches || []} userId={user.id} />
         </div>

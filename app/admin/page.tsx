@@ -4,6 +4,7 @@ import { AdminHeader } from "@/components/admin/admin-header"
 import { AdminStatsCards } from "@/components/admin/admin-stats-cards"
 import { UsersTable } from "@/components/admin/users-table"
 import { SystemHealth } from "@/components/admin/system-health"
+import { AdminAnalyticsCharts } from "@/components/admin/admin-analytics-charts"
 
 export default async function AdminPage() {
   const { user, profile } = await requireAdmin()
@@ -38,6 +39,13 @@ export default async function AdminPage() {
             postsCount={allPosts?.length || 0}
             adsCount={allAds?.length || 0}
             analytics={analytics || []}
+          />
+
+          <AdminAnalyticsCharts
+            data={analytics || []}
+            users={allUsers || []}
+            personas={allPersonas || []}
+            messages={allMessages || []}
           />
 
           <div className="grid gap-6 lg:grid-cols-3">

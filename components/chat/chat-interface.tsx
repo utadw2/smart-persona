@@ -14,16 +14,17 @@ import { createClient } from "@/lib/supabase/client"
 interface ChatInterfaceProps {
   currentUserId: string
   initialConversations: any[]
-  initialConversationId?: string | null // Added prop for initial conversation selection
+  initialConversationId?: string | null
 }
 
 export function ChatInterface({ currentUserId, initialConversations, initialConversationId }: ChatInterfaceProps) {
   const [conversations, setConversations] = useState(initialConversations)
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(initialConversationId || null)
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
   const [messages, setMessages] = useState<any[]>([])
   const [message, setMessage] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [mobileConversationsOpen, setMobileConversationsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(!!initialConversationId)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
 
@@ -31,10 +32,109 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
   const otherParticipant =
     selectedChat?.participant1_id === currentUserId ? selectedChat.participant2 : selectedChat?.participant1
 
+  // โหลด conversation จาก URL parameter
+  useEffect(() => {
+    const loadConversation = async () => {
+      if (!initialConversationId) {
+        setIsLoading(false)
+        return
+      }
+      
+      // ตรวจสอบว่า conversation มีอยู่แล้วหรือไม่
+      const existingConv = conversations.find(c => c.id === initialConversationId)
+      if (existingConv) {
+        setSelectedConversation(initialConversationId)
+        setIsLoading(false)
+        return
+      }
+
+      // โหลด conversation ใหม่จากฐานข้อมูล
+      try {
+        const { data: conversation, error } = await supabase
+          .from("chat_conversations")
+          .select(`
+            *,
+            participant1:profiles!participant1_id(id, full_name, avatar_url),
+            participant2:profiles!participant2_id(id, full_name, avatar_url)
+          `)
+          .eq("id", initialConversationId)
+          .single()
+
+        if (error) {
+          console.error("Error loading conversation:", error)
+          setIsLoading(false)
+          return
+        }
+
+        if (conversation) {
+          // เพิ่ม conversation ใหม่เข้าไปในรายการ
+          setConversations(prev => {
+            const exists = prev.find(c => c.id === conversation.id)
+            if (exists) return prev
+            return [conversation, ...prev]
+          })
+          setSelectedConversation(initialConversationId)
+        }
+      } catch (error) {
+        console.error("Error loading conversation:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadConversation()
+  }, [initialConversationId])
+
+  // Real-time subscription สำหรับ conversations ใหม่
+  useEffect(() => {
+    const channel = supabase
+      .channel('conversations')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_conversations',
+        },
+        async (payload) => {
+          const newConv = payload.new as any
+          
+          // ตรวจสอบว่า user เป็นส่วนหนึ่งของ conversation หรือไม่
+          if (newConv.participant1_id !== currentUserId && newConv.participant2_id !== currentUserId) {
+            return
+          }
+          
+          // โหลดข้อมูล profiles
+          const { data: conversationWithProfiles } = await supabase
+            .from("chat_conversations")
+            .select(`
+              *,
+              participant1:profiles!participant1_id(id, full_name, avatar_url),
+              participant2:profiles!participant2_id(id, full_name, avatar_url)
+            `)
+            .eq("id", newConv.id)
+            .single()
+
+          if (conversationWithProfiles) {
+            setConversations(prev => {
+              const exists = prev.find(c => c.id === conversationWithProfiles.id)
+              if (exists) return prev
+              return [conversationWithProfiles, ...prev]
+            })
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [currentUserId])
+
+  // Real-time subscription สำหรับข้อความใหม่
   useEffect(() => {
     if (!selectedConversation) return
 
-    // Load messages for selected conversation
     loadMessages()
 
     const channel = supabase
@@ -45,12 +145,31 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
           event: "INSERT",
           schema: "public",
           table: "chat_messages",
-          filter: `sender_id=eq.${otherParticipant?.id}`,
+          // ลบ filter ออกเพื่อให้ได้รับข้อความทั้งหมด
         },
         (payload) => {
-          console.log("[v0] Received new message:", payload)
-          setMessages((prev) => [...prev, payload.new])
-          scrollToBottom()
+          const newMessage = payload.new as any
+          
+          // ตรวจสอบว่าข้อความนี้เกี่ยวข้องกับ conversation ที่เลือกหรือไม่
+          if (otherParticipant && (
+            (newMessage.sender_id === currentUserId && newMessage.receiver_id === otherParticipant.id) ||
+            (newMessage.sender_id === otherParticipant.id && newMessage.receiver_id === currentUserId)
+          )) {
+            setMessages((prev) => {
+              // ป้องกันข้อความซ้ำ
+              if (prev.some(m => m.id === newMessage.id)) return prev
+              return [...prev, newMessage]
+            })
+            scrollToBottom()
+            
+            // ถ้าเป็นข้อความจากคนอื่น ให้ mark as read
+            if (newMessage.sender_id === otherParticipant.id) {
+              supabase
+                .from("chat_messages")
+                .update({ is_read: true })
+                .eq("id", newMessage.id)
+            }
+          }
         },
       )
       .subscribe()
@@ -60,16 +179,8 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
     }
   }, [selectedConversation, currentUserId, otherParticipant?.id])
 
-  useEffect(() => {
-    if (initialConversationId && conversations.some(c => c.id === initialConversationId)) {
-      setSelectedConversation(initialConversationId)
-    }
-  }, [initialConversationId, conversations])
-
   const loadMessages = async () => {
     if (!selectedConversation || !otherParticipant) return
-
-    console.log("[v0] Loading messages between", currentUserId, "and", otherParticipant.id)
 
     const { data } = await supabase
       .from("chat_messages")
@@ -79,9 +190,8 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
       )
       .order("created_at", { ascending: true })
 
-    console.log("[v0] Loaded messages:", data?.length)
     setMessages(data || [])
-    scrollToBottom()
+    setTimeout(scrollToBottom, 100)
 
     // Mark messages as read
     await supabase
@@ -94,7 +204,20 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
   const sendMessage = async () => {
     if (!message.trim() || !otherParticipant) return
 
-    console.log("[v0] Sending message to", otherParticipant.id)
+    const tempMessage = {
+      id: `temp-${Date.now()}`,
+      sender_id: currentUserId,
+      receiver_id: otherParticipant.id,
+      message: message.trim(),
+      created_at: new Date().toISOString(),
+      is_read: false,
+    }
+
+    // แสดงข้อความทันทีในอินเทอร์เฟซ
+    setMessages((prev) => [...prev, tempMessage])
+    const messageToSend = message.trim()
+    setMessage("")
+    scrollToBottom()
 
     try {
       const response = await fetch("/api/chat/send", {
@@ -102,7 +225,7 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           receiverId: otherParticipant.id,
-          message: message.trim(),
+          message: messageToSend,
           conversationId: selectedConversation,
         }),
       })
@@ -112,13 +235,16 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
       }
 
       const { message: newMessage } = await response.json()
-      console.log("[v0] Message sent successfully:", newMessage)
 
-      setMessages((prev) => [...prev, newMessage])
-      setMessage("")
-      scrollToBottom()
+      // แทนที่ข้อความชั่วคราวด้วยข้อความจริง
+      setMessages((prev) => 
+        prev.map(msg => msg.id === tempMessage.id ? newMessage : msg)
+      )
     } catch (error) {
-      console.error("[v0] Error sending message:", error)
+      console.error("Error sending message:", error)
+      // ลบข้อความชั่วคราวออก
+      setMessages((prev) => prev.filter(msg => msg.id !== tempMessage.id))
+      setMessage(messageToSend)
       alert("Failed to send message. Please try again.")
     }
   }
@@ -131,6 +257,17 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
     const participant = conv.participant1_id === currentUserId ? conv.participant2 : conv.participant1
     return participant?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
   })
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <div className="text-center">
+          <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-2 animate-pulse" />
+          <p className="text-sm text-muted-foreground">Loading conversation...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (conversations.length === 0) {
     return (
@@ -150,7 +287,7 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
-      {/* Desktop: Fixed sidebar, Mobile: Hidden */}
+      {/* Desktop Sidebar */}
       <div className="hidden md:flex md:w-80 border-r flex-col">
         <div className="p-4 border-b">
           <div className="relative">
@@ -201,7 +338,7 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
         </ScrollArea>
       </div>
 
-      {/* Mobile: Sheet for conversations */}
+      {/* Mobile Sheet */}
       <Sheet open={mobileConversationsOpen} onOpenChange={setMobileConversationsOpen}>
         <SheetContent side="left" className="w-80 p-0 md:hidden">
           <div className="flex flex-col h-full">
@@ -251,7 +388,7 @@ export function ChatInterface({ currentUserId, initialConversations, initialConv
         <div className="flex-1 flex flex-col">
           {selectedConversation && otherParticipant ? (
             <>
-              {/* Chat Header with mobile menu trigger */}
+              {/* Chat Header */}
               <div className="p-4 border-b flex items-center gap-3">
                 <SheetTrigger asChild className="md:hidden">
                   <Button variant="ghost" size="icon">

@@ -1,9 +1,10 @@
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { CommunityPersonas } from "@/components/community/community-personas"
 import { CommunityPosts } from "@/components/community/community-posts"
 import { CommunityChatSidebar } from "@/components/community/community-chat-sidebar"
+import { AdSpace } from "@/components/ads/ad-space"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function CommunityPage() {
@@ -76,8 +77,10 @@ export default async function CommunityPage() {
         <div className="mx-auto max-w-7xl space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Community</h1>
-            <p className="text-muted-foreground">Description</p>
+            <p className="text-muted-foreground">Discover personas and connect with professionals</p>
           </div>
+
+          <AdSpace placement="banner" />
 
           <Tabs defaultValue="personas" className="w-full">
             <TabsList>
@@ -85,7 +88,7 @@ export default async function CommunityPage() {
               <TabsTrigger value="posts">Posts</TabsTrigger>
             </TabsList>
             <TabsContent value="personas" className="mt-6">
-              <CommunityPersonas personas={publicPersonas} />
+              <CommunityPersonas personas={publicPersonas} currentUserId={user.id} />
             </TabsContent>
             <TabsContent value="posts" className="mt-6">
               <CommunityPosts posts={posts} currentUserId={user.id} />
@@ -93,7 +96,7 @@ export default async function CommunityPage() {
           </Tabs>
         </div>
       </main>
-      
+
       <CommunityChatSidebar currentUserId={user.id} />
     </div>
   )

@@ -52,9 +52,6 @@ export function AdminHeader({ user, profile }: AdminHeaderProps) {
             <Link href="/admin/ads" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               Ads
             </Link>
-            <Link href="/admin/analytics" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-              Analytics
-            </Link>
             <Link href="/admin/settings" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               Settings
             </Link>

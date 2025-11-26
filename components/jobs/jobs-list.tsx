@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SearchInput } from "@/components/ui/search-input"
+import { AdSpace } from "@/components/ads/ad-space"
 import { MapPin, DollarSign, Briefcase, ExternalLink, Heart, Check } from "lucide-react"
 import type { Job, Persona, JobMatch } from "@/lib/types"
 
@@ -24,13 +25,11 @@ export function JobsList({ jobs, personas, jobMatches, userId }: JobsListProps) 
   const [searchQuery, setSearchQuery] = useState("")
   const [savingJobId, setSavingJobId] = useState<string | null>(null)
 
-  // 27-65 feature cal Match job 
-
   const calculateMatchScore = (job: Job, persona: Persona): number => {
     let score = 0
     const maxScore = 100
 
-    // Match skills คำนวนการเข้ากันของสกิล หรือ jobMatches
+    // Match skills
     if (persona.career?.specializations && job.skills) {
       const matchingSkills = persona.career.specializations.filter((skill) =>
         job.skills.some((jobSkill) => jobSkill.toLowerCase().includes(skill.toLowerCase())),
@@ -195,80 +194,87 @@ export function JobsList({ jobs, personas, jobMatches, userId }: JobsListProps) 
 
       {filteredJobs.length > 0 ? (
         <div className="space-y-4">
-          {filteredJobs.map((job) => (
-            <Card key={job.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <CardTitle>{job.title}</CardTitle>
-                      {job.match_score > 0 && (
-                        <Badge
-                          variant={job.match_score >= 70 ? "default" : job.match_score >= 50 ? "secondary" : "outline"}
-                        >
-                          {job.match_score}% Match
+          {filteredJobs.map((job, index) => (
+            <>
+              <Card key={job.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <CardTitle>{job.title}</CardTitle>
+                        {job.match_score > 0 && (
+                          <Badge
+                            variant={
+                              job.match_score >= 70 ? "default" : job.match_score >= 50 ? "secondary" : "outline"
+                            }
+                          >
+                            {job.match_score}% Match
+                          </Badge>
+                        )}
+                        {job.remote && <Badge variant="outline">Remote</Badge>}
+                      </div>
+                      <CardDescription className="mt-2">
+                        {job.company} • {job.industry}
+                      </CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSaveJob(job.id)}
+                      disabled={savingJobId === job.id}
+                    >
+                      {isJobSaved(job.id) ? <Check className="h-5 w-5 text-primary" /> : <Heart className="h-5 w-5" />}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-sm text-muted-foreground">{job.description}</p>
+
+                  <div className="flex flex-wrap gap-4 text-sm mb-4">
+                    {job.location && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        {job.location}
+                      </div>
+                    )}
+                    {job.salary_min && job.salary_max && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <DollarSign className="h-4 w-4" />${job.salary_min.toLocaleString()} - $
+                        {job.salary_max.toLocaleString()}
+                      </div>
+                    )}
+                    {job.job_type && (
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Briefcase className="h-4 w-4" />
+                        <span className="capitalize">{job.job_type}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {job.skills && job.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {job.skills.map((skill, i) => (
+                        <Badge key={i} variant="secondary">
+                          {skill}
                         </Badge>
-                      )}
-                      {job.remote && <Badge variant="outline">Remote</Badge>}
-                    </div>
-                    <CardDescription className="mt-2">
-                      {job.company} • {job.industry}
-                    </CardDescription>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleSaveJob(job.id)}
-                    disabled={savingJobId === job.id}
-                  >
-                    {isJobSaved(job.id) ? <Check className="h-5 w-5 text-primary" /> : <Heart className="h-5 w-5" />}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-sm text-muted-foreground">{job.description}</p>
-
-                <div className="flex flex-wrap gap-4 text-sm mb-4">
-                  {job.location && (
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      {job.location}
+                      ))}
                     </div>
                   )}
-                  {job.salary_min && job.salary_max && (
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <DollarSign className="h-4 w-4" />${job.salary_min.toLocaleString()} - $
-                      {job.salary_max.toLocaleString()}
-                    </div>
-                  )}
-                  {job.job_type && (
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Briefcase className="h-4 w-4" />
-                      <span className="capitalize">{job.job_type}</span>
-                    </div>
-                  )}
-                </div>
 
-                {job.skills && job.skills.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {job.skills.map((skill, i) => (
-                      <Badge key={i} variant="secondary">
-                        {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
-                {job.application_url && (
-                  <Button asChild variant="outline" className="w-full bg-transparent">
-                    <a href={job.application_url} target="_blank" rel="noopener noreferrer">
-                      Apply Now
-                      <ExternalLink className="ml-2 h-4 w-4" />
-                    </a>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+                  {job.application_url && (
+                    <Button asChild variant="outline" className="w-full bg-transparent">
+                      <a href={job.application_url} target="_blank" rel="noopener noreferrer">
+                        Apply Now
+                        <ExternalLink className="ml-2 h-4 w-4" />
+                      </a>
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+              {(index + 1) % 3 === 0 && index !== filteredJobs.length - 1 && (
+                <AdSpace key={`ad-${index}`} placement="feed" />
+              )}
+            </>
           ))}
         </div>
       ) : (

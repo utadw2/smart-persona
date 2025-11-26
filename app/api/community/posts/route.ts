@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { userId, title, content, postType, personaId, tags } = await request.json()
+  const { userId, title, content, postType, personaId, tags, imageUrl } = await request.json()
 
   if (userId !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
@@ -27,7 +27,12 @@ export async function POST(request: Request) {
       post_type: postType,
       persona_id: personaId,
       tags: tags || [],
-      is_published: true,
+      metadata: imageUrl ? { image_url: imageUrl } : null,
+      is_published: false,
+      moderation_status: "pending",
+      likes_count: 0,
+      comments_count: 0,
+      views_count: 0,
     })
     .select()
     .single()
