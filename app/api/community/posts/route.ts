@@ -29,7 +29,6 @@ export async function POST(request: Request) {
       tags: tags || [],
       metadata: imageUrl ? { image_url: imageUrl } : null,
       is_published: false,
-      moderation_status: "pending",
       likes_count: 0,
       comments_count: 0,
       views_count: 0,

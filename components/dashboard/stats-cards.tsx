@@ -1,45 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MessageSquare, Users, Zap } from "lucide-react"
+import { Users } from "lucide-react"
 
 interface StatsCardsProps {
   personasCount: number
-  messagesCount: number
-  channelsCount: number
 }
 
-export function StatsCards({ personasCount, messagesCount, channelsCount }: StatsCardsProps) {
+export function StatsCards({ personasCount }: StatsCardsProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Active Personas</CardTitle>
-          <Users className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{personasCount}</div>
-          <p className="text-xs text-muted-foreground">AI personalities configured</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Total Messages</CardTitle>
-          <MessageSquare className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{messagesCount}</div>
-          <p className="text-xs text-muted-foreground">Across all channels</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Connected Channels</CardTitle>
-          <Zap className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{channelsCount}</div>
-          <p className="text-xs text-muted-foreground">Social media accounts</p>
-        </CardContent>
-      </Card>
-    </div>
+    <Card className="overflow-hidden border-2 transition-all hover:shadow-lg">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 bg-gradient-to-br from-primary/10 to-primary/5 pb-4">
+        <CardTitle className="text-base font-semibold">Active Personas</CardTitle>
+        <div className="rounded-full bg-primary/10 p-2">
+          <Users className="h-5 w-5 text-primary" />
+        </div>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <div className="text-4xl font-bold tracking-tight">{personasCount}</div>
+        <p className="mt-2 text-sm text-muted-foreground"> personalities configured</p>
+      </CardContent>
+    </Card>
   )
 }

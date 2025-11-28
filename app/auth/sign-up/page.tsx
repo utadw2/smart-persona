@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -53,18 +55,34 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-            <CardDescription>Get started with Smart Persona</CardDescription>
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-6">
+      {/* Background decoration */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute left-1/4 top-1/4 h-[400px] w-[400px] rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute right-1/4 bottom-1/4 h-[300px] w-[300px] rounded-full bg-blue-500/10 blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md">
+        {/* Logo/Brand */}
+        <div className="animate-fade-in mb-8 text-center opacity-0">
+          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold">
+            <Sparkles className="h-6 w-6 text-primary" />
+            Smart Persona
+          </Link>
+        </div>
+
+        <Card className="animate-scale-in border-2 opacity-0 shadow-xl">
+          <CardHeader className="space-y-3 text-center">
+            <CardTitle className="text-3xl font-bold">Create Your Account</CardTitle>
+            <CardDescription className="text-base">Start building your professional identity today</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignUp}>
-              <div className="flex flex-col gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="fullName">Full Name</Label>
+            <form onSubmit={handleSignUp} className="space-y-5">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-sm font-medium">
+                    Full Name
+                  </Label>
                   <Input
                     id="fullName"
                     type="text"
@@ -72,10 +90,13 @@ export default function SignUpPage() {
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    className="h-11"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email Address
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -83,42 +104,64 @@ export default function SignUpPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="h-11"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </Label>
                   <Input
                     id="password"
                     type="password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    className="h-11"
+                    placeholder="At least 8 characters"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                    Confirm Password
+                  </Label>
                   <Input
                     id="confirmPassword"
                     type="password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="h-11"
                   />
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Sign Up"}
-                </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
-                <Link href="/auth/login" className="font-medium underline underline-offset-4">
-                  Sign in
-                </Link>
-              </div>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <Button type="submit" className="h-11 w-full text-base font-medium" disabled={isLoading}>
+                {isLoading ? "Creating your account..." : "Create Account"}
+              </Button>
             </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link href="/auth/login" className="font-semibold text-primary hover:underline">
+                  Sign in instead
+                </Link>
+              </p>
+            </div>
           </CardContent>
         </Card>
+
+        <p className="mt-8 text-center text-xs text-muted-foreground">
+          By creating an account, you agree to our Terms of Service and Privacy Policy
+        </p>
       </div>
     </div>
   )

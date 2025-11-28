@@ -1,38 +1,40 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Input } from "@/components/ui/input"
-import { MessageSquare, X, Send, Search } from 'lucide-react'
-import { createClient } from "@/lib/supabase/client"
-import { formatDistanceToNow } from "date-fns"
+import { useState, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { MessageSquare, X, Send, Search } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { formatDistanceToNow } from "date-fns";
 
 interface CommunityChatSidebarProps {
-  currentUserId: string
+  currentUserId: string;
 }
 
-export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [users, setUsers] = useState<any[]>([])
-  const [conversations, setConversations] = useState<any[]>([])
-  const [selectedUser, setSelectedUser] = useState<any>(null)
-  const [messages, setMessages] = useState<any[]>([])
-  const [message, setMessage] = useState("")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [view, setView] = useState<"users" | "chat">("users")
-  const supabase = createClient()
+export function CommunityChatSidebar({
+  currentUserId,
+}: CommunityChatSidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [message, setMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [view, setView] = useState<"users" | "chat">("users");
+  const supabase = createClient();
 
   useEffect(() => {
-    loadUsers()
-    loadConversations()
-  }, [])
+    loadUsers();
+    loadConversations();
+  }, []);
 
   useEffect(() => {
-    if (!selectedUser) return
+    if (!selectedUser) return;
 
-    loadMessages()
+    loadMessages();
 
     const channel = supabase
       .channel(`chat:${currentUserId}:${selectedUser.id}`)
@@ -45,74 +47,79 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
           filter: `sender_id=eq.${selectedUser.id}`,
         },
         (payload) => {
-          setMessages((prev) => [...prev, payload.new])
-        },
+          setMessages((prev) => [...prev, payload.new]);
+        }
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [selectedUser])
+      supabase.removeChannel(channel);
+    };
+  }, [selectedUser]);
 
   const loadUsers = async () => {
     const { data } = await supabase
       .from("profiles")
       .select("id, full_name, avatar_url, bio")
       .neq("id", currentUserId)
-      .limit(20)
+      .limit(20);
 
-    setUsers(data || [])
-  }
+    setUsers(data || []);
+  };
 
   const loadConversations = async () => {
     const { data } = await supabase
       .from("chat_conversations")
       .select("*")
-      .or(`participant1_id.eq.${currentUserId},participant2_id.eq.${currentUserId}`)
+      .or(
+        `participant1_id.eq.${currentUserId},participant2_id.eq.${currentUserId}`
+      )
       .order("last_message_at", { ascending: false })
-      .limit(10)
+      .limit(10);
 
     const conversationsWithProfiles = await Promise.all(
       (data || []).map(async (conv) => {
-        const otherId = conv.participant1_id === currentUserId ? conv.participant2_id : conv.participant1_id
+        const otherId =
+          conv.participant1_id === currentUserId
+            ? conv.participant2_id
+            : conv.participant1_id;
         const { data: profile } = await supabase
           .from("profiles")
           .select("id, full_name, avatar_url")
           .eq("id", otherId)
-          .single()
+          .single();
 
-        return { ...conv, profile }
-      }),
-    )
+        return { ...conv, profile };
+      })
+    );
 
-    setConversations(conversationsWithProfiles)
-  }
+    setConversations(conversationsWithProfiles);
+  };
 
   const loadMessages = async () => {
-    if (!selectedUser) return
+    if (!selectedUser) return;
 
     const { data } = await supabase
       .from("chat_messages")
       .select("*")
       .or(
-        `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`,
+        `and(sender_id.eq.${currentUserId},receiver_id.eq.${selectedUser.id}),and(sender_id.eq.${selectedUser.id},receiver_id.eq.${currentUserId})`
       )
       .order("created_at", { ascending: true })
-      .limit(50)
+      .limit(50);
 
-    setMessages(data || [])
+    setMessages(data || []);
 
     // Mark as read
     await supabase
       .from("chat_messages")
       .update({ is_read: true })
       .eq("receiver_id", currentUserId)
-      .eq("sender_id", selectedUser.id)
-  }
+      .eq("sender_id", selectedUser.id);
+  };
 
   const sendMessage = async () => {
-    if (!message.trim() || !selectedUser) return
+    if (!message.trim() || !selectedUser) return;
 
     try {
       const response = await fetch("/api/chat/send", {
@@ -122,32 +129,32 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
           receiverId: selectedUser.id,
           message: message.trim(),
         }),
-      })
+      });
 
       if (response.ok) {
-        const { message: newMessage } = await response.json()
-        setMessages((prev) => [...prev, newMessage])
-        setMessage("")
-        loadConversations()
+        const { message: newMessage } = await response.json();
+        setMessages((prev) => [...prev, newMessage]);
+        setMessage("");
+        loadConversations();
       }
     } catch (error) {
-      console.error("Failed to send message:", error)
+      console.error("Failed to send message:", error);
     }
-  }
+  };
 
   const openChat = (user: any) => {
-    setSelectedUser(user)
-    setView("chat")
-  }
+    setSelectedUser(user);
+    setView("chat");
+  };
 
   const closeChat = () => {
-    setSelectedUser(null)
-    setView("users")
-  }
+    setSelectedUser(null);
+    setView("users");
+  };
 
   const filteredUsers = users.filter((user) =>
-    user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+    user.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
@@ -168,7 +175,9 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
           {/* Header */}
           <div className="p-4 border-b flex items-center justify-between">
             <h3 className="font-semibold">
-              {view === "chat" && selectedUser ? selectedUser.full_name : "Community Chat"}
+              {view === "chat" && selectedUser
+                ? selectedUser.full_name
+                : "Community Chat"}
             </h3>
             <div className="flex gap-2">
               {view === "chat" && (
@@ -176,7 +185,11 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
                   <X className="h-4 w-4" />
                 </Button>
               )}
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsOpen(false)}
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -201,7 +214,9 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
               {/* Recent Conversations */}
               {conversations.length > 0 && (
                 <div className="border-b">
-                  <p className="text-xs font-semibold text-muted-foreground px-3 py-2">Recent</p>
+                  <p className="text-xs font-semibold text-muted-foreground px-3 py-2">
+                    Recent
+                  </p>
                   {conversations.slice(0, 3).map((conv) => (
                     <button
                       key={conv.id}
@@ -209,13 +224,21 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
                       className="w-full p-3 flex items-center gap-3 hover:bg-muted transition-colors"
                     >
                       <Avatar className="h-9 w-9">
-                        <AvatarImage src={conv.profile?.avatar_url || "/placeholder.svg"} />
-                        <AvatarFallback>{conv.profile?.full_name?.[0]}</AvatarFallback>
+                        <AvatarImage
+                          src={conv.profile?.avatar_url || "/placeholder.svg"}
+                        />
+                        <AvatarFallback>
+                          {conv.profile?.full_name?.[0]}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-medium">{conv.profile?.full_name}</p>
+                        <p className="text-sm font-medium">
+                          {conv.profile?.full_name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(conv.last_message_at), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(conv.last_message_at), {
+                            addSuffix: true,
+                          })}
                         </p>
                       </div>
                     </button>
@@ -225,7 +248,9 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
 
               {/* Online Users */}
               <ScrollArea className="flex-1">
-                <p className="text-xs font-semibold text-muted-foreground px-3 py-2">Community Members</p>
+                <p className="text-xs font-semibold text-muted-foreground px-3 py-2">
+                  Community Members
+                </p>
                 {filteredUsers.map((user) => (
                   <button
                     key={user.id}
@@ -233,12 +258,16 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
                     className="w-full p-3 flex items-center gap-3 hover:bg-muted transition-colors"
                   >
                     <Avatar className="h-9 w-9">
-                      <AvatarImage src={user.avatar_url || "/placeholder.svg"} />
+                      <AvatarImage
+                        src={user.avatar_url || "/placeholder.svg"}
+                      />
                       <AvatarFallback>{user.full_name?.[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 text-left">
                       <p className="text-sm font-medium">{user.full_name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{user.bio}</p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {user.bio}
+                      </p>
                     </div>
                   </button>
                 ))}
@@ -250,23 +279,36 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
               <ScrollArea className="flex-1 p-3">
                 <div className="space-y-3">
                   {messages.map((msg) => {
-                    const isOwn = msg.sender_id === currentUserId
+                    const isOwn = msg.sender_id === currentUserId;
                     return (
-                      <div key={msg.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
+                      <div
+                        key={msg.id}
+                        className={`flex ${
+                          isOwn ? "justify-end" : "justify-start"
+                        }`}
+                      >
                         <div
-                          className={`max-w-[75%] rounded-lg p-2 ${
-                            isOwn ? "bg-primary text-primary-foreground" : "bg-muted"
+                          className={`max-w-[75%] rounded-lg p-2 break-words whitespace-pre-wrap ${
+                            isOwn
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
                           }`}
                         >
                           <p className="text-sm">{msg.message}</p>
                           <p
-                            className={`text-xs mt-1 ${isOwn ? "text-primary-foreground/70" : "text-muted-foreground"}`}
+                            className={`text-xs mt-1 ${
+                              isOwn
+                                ? "text-primary-foreground/70"
+                                : "text-muted-foreground"
+                            }`}
                           >
-                            {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(msg.created_at), {
+                              addSuffix: true,
+                            })}
                           </p>
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </ScrollArea>
@@ -281,7 +323,12 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                     className="h-9"
                   />
-                  <Button onClick={sendMessage} disabled={!message.trim()} size="icon" className="h-9 w-9">
+                  <Button
+                    onClick={sendMessage}
+                    disabled={!message.trim()}
+                    size="icon"
+                    className="h-9 w-9"
+                  >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
@@ -291,5 +338,5 @@ export function CommunityChatSidebar({ currentUserId }: CommunityChatSidebarProp
         </div>
       )}
     </>
-  )
+  );
 }

@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { createClient } from "@/lib/supabase/client"
 import type { User } from "@supabase/supabase-js"
-import { useRouter, usePathname } from 'next/navigation'
-import { LogOut, Settings, UserIcon, Shield, Bookmark } from 'lucide-react'
+import { useRouter, usePathname } from "next/navigation"
+import { LogOut, Settings, UserIcon, Shield, Bookmark } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
@@ -28,10 +28,10 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    router.push("/auth/login")
+    router.push("/")
   }
 
-  const isAdmin = profile?.role === "admin"
+  const isAdmin = true // Everyone is admin now
 
   const isActive = (path: string) => {
     if (path === "/dashboard") {
@@ -54,7 +54,7 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
                 "text-sm font-medium transition-colors hover:text-foreground",
                 isActive("/dashboard") && pathname === "/dashboard"
                   ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
+                  : "text-muted-foreground",
               )}
             >
               Dashboard
@@ -63,9 +63,7 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
               href="/dashboard/personas"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-foreground",
-                isActive("/dashboard/personas")
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
+                isActive("/dashboard/personas") ? "text-foreground font-semibold" : "text-muted-foreground",
               )}
             >
               Personas
@@ -74,9 +72,7 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
               href="/dashboard/jobs"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-foreground",
-                isActive("/dashboard/jobs")
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
+                isActive("/dashboard/jobs") ? "text-foreground font-semibold" : "text-muted-foreground",
               )}
             >
               Find Jobs
@@ -85,9 +81,7 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
               href="/community"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-foreground",
-                isActive("/community")
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
+                isActive("/community") ? "text-foreground font-semibold" : "text-muted-foreground",
               )}
             >
               Community
@@ -96,9 +90,7 @@ export function DashboardHeader({ user, profile }: DashboardHeaderProps) {
               href="/dashboard/chat"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-foreground",
-                isActive("/dashboard/chat")
-                  ? "text-foreground font-semibold"
-                  : "text-muted-foreground"
+                isActive("/dashboard/chat") ? "text-foreground font-semibold" : "text-muted-foreground",
               )}
             >
               Chat

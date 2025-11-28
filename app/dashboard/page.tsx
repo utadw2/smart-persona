@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
+import { StatsCards } from "@/components/dashboard/stats-cards"
 import { ActivePersonas } from "@/components/dashboard/active-personas"
+import { AdSpace } from "@/components/ads/ad-space"
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -20,31 +22,20 @@ export default async function DashboardPage() {
   // Fetch user stats
   const { data: personas } = await supabase.from("personas").select("*").eq("user_id", user.id)
 
-  const { data: chatMessages } = await supabase
-    .from("chat_messages")
-    .select("*")
-    .eq("sender_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(10)
+  return (
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background to-muted/20">
+      <DashboardHeader user={user} profile={profile} />
+      <main className="flex-1 p-6">
+        <div className="mx-auto max-w-6xl space-y-8">
+          <AdSpace placement="banner" />
 
-  const { data: posts } = await supabase
-    .from("community_posts")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
+          <div className="space-y-6">
+            <StatsCards personasCount={personas?.length || 0} />
 
-    return (
-      <div className="flex min-h-screen flex-col">
-        <DashboardHeader user={user} profile={profile} />
-        <main className="flex flex-1 items-center justify-center p-6">
-          <div className="w-full max-w-4xl mx-auto">
-            <div className="flex justify-center">
-              <div className="w-full max-w-2xl">
-                <ActivePersonas personas={personas || []} />
-              </div>
-            </div>
+            <ActivePersonas personas={personas || []} />
           </div>
-        </main>
-      </div>
-    )
-  }
+        </div>
+      </main>
+    </div>
+  )
+}

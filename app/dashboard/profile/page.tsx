@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server"
 import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { ProfileView } from "@/components/profile/profile-view"
 import { ProfileStats } from "@/components/profile/profile-stats"
-import { ProfileActivity } from "@/components/profile/profile-activity"
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -20,13 +19,6 @@ export default async function ProfilePage() {
 
   const { data: personas } = await supabase.from("personas").select("*").eq("user_id", user.id)
 
-  const { data: chatMessages } = await supabase
-    .from("chat_messages")
-    .select("*")
-    .eq("sender_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(5)
-
   const { data: posts } = await supabase
     .from("community_posts")
     .select("*")
@@ -39,7 +31,6 @@ export default async function ProfilePage() {
       <main className="flex-1 p-6">
         <div className="mx-auto max-w-5xl space-y-6">
           <ProfileView profile={profile} userId={user.id} />
-          <ProfileActivity messages={chatMessages || []} personas={personas || []} />
         </div>
       </main>
     </div>
