@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Heart, MessageCircle, Eye, Plus, Send } from 'lucide-react'
+import { Heart, MessageCircle, Eye, Plus, Send, Clock } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation"
 import type { CommunityPost } from "@/lib/types"
 
 interface CommunityPostsProps {
@@ -103,9 +103,20 @@ export function CommunityPosts({ posts, currentUserId }: CommunityPostsProps) {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline" className="capitalize">
-                    {post.post_type}
-                  </Badge>
+                  <div className="flex gap-2">
+                    {post.moderation_status === "pending" && (
+                      <Badge
+                        variant="secondary"
+                        className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                      >
+                        <Clock className="h-3 w-3 mr-1" />
+                        Pending Review
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="capitalize">
+                      {post.post_type}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -142,11 +153,7 @@ export function CommunityPosts({ posts, currentUserId }: CommunityPostsProps) {
                     </Link>
                   </Button>
                   {post.user_id !== currentUserId && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleSendMessage(post.user_id)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => handleSendMessage(post.user_id)}>
                       <Send className="mr-1 h-4 w-4" />
                       Message
                     </Button>

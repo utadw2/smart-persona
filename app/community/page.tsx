@@ -45,11 +45,21 @@ export default async function CommunityPage() {
     .from("community_posts")
     .select("*")
     .eq("is_published", true)
+    .eq("moderation_status", "approved")
     .order("created_at", { ascending: false })
     .limit(50)
 
+  const { data: userPendingPosts } = await supabase
+    .from("community_posts")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("moderation_status", "pending")
+    .order("created_at", { ascending: false })
+
+  const allPostsData = [...(postsData || []), ...(userPendingPosts || [])]
+
   const posts = await Promise.all(
-    (postsData || []).map(async (post) => {
+    allPostsData.map(async (post) => {
       const { data: userProfile } = await supabase
         .from("profiles")
         .select("id, full_name, avatar_url")
